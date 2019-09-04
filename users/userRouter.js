@@ -44,7 +44,18 @@ router.get('/:id', validateUserId, (req, res) => {
 
 router.get('/:id/posts', (req, res) => {});
 
-router.delete('/:id', (req, res) => {});
+router.delete('/:id', validateUserId, (req, res) => {
+	const { id } = req.params;
+	db.remove(id)
+		.then(user => {
+			if (user) {
+				res.status(204).json({ Message: 'User Delete', id });
+			}
+		})
+		.catch(err => {
+			res.status(500).json({ error: 'The user could not be removed' });
+		});
+});
 
 router.put('/:id', (req, res) => {});
 
@@ -52,30 +63,40 @@ router.put('/:id', (req, res) => {});
 
 function validateUserId(req, res, next) {
 	let userId = req.params.id;
+
 	db.getById(userId).then(user => {
-		console.log('validatUserId', userId);
+		// console.log('validatUserId', userId);
 		if (user === undefined || user.length === 0) {
 			res.status(400).json({ message: 'invalid user id' });
 		} else {
 			res.status(200).json({ user });
 		}
+		next();
 	});
-
 }
 
 function validateUser(req, res, next) {
 	// let body = req.body
-	console.log('validateUser', res);
+	// console.log('validateUser', res);
 	if (!req.body) {
 		res.status(400).json({ message: 'missing user data' });
 		// next();
 	} else if (!req.body.name) {
 		res.status(400).json({ message: 'missing required name field' });
 		// next();
+	} else {
+		next();
 	}
-	next();
 }
 
-function validatePost(req, res, next) {}
+function validatePost(req, res, next) {
+	if (!req.body) {
+		res.status(400).json({ message: 'missing post data' });
+	} else if (!req.body.text) {
+		res.status(400).json({ message: 'missing required text field' });
+	} else {
+		next();
+	}
+}
 
 module.exports = router;
