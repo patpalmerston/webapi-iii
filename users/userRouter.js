@@ -5,9 +5,10 @@ const router = express.Router();
 
 router.post('/', validateUser, (req, res) => {
 	const userData = req.body;
-	db.insert()
-		.then(res => {
-			res.status(200).json(userData);
+	db.insert(userData)
+		.then(user => {
+			console.log('users post', user);
+			res.status(200).json(user);
 		})
 		.catch(err => {
 			res.status(500).json({
@@ -19,10 +20,10 @@ router.post('/', validateUser, (req, res) => {
 router.post('/:id/posts', (req, res) => {});
 
 router.get('/', (req, res) => {
-  // can not re use the res
+	// can not re use the res
 	db.get()
 		.then(user => {
-			console.log('users get', res);
+			// console.log('users get', res);
 			res.status(200).json(user);
 			return;
 		})
@@ -55,12 +56,15 @@ function validateUserId(req, res, next) {
 
 function validateUser(req, res, next) {
 	// let body = req.body
+	console.log('validateUser', res);
 	if (!req.body) {
 		res.status(400).json({ message: 'missing user data' });
+
 	} else if (!req.body.name) {
 		res.status(400).json({ message: 'missing required name field' });
-	}
-	next();
+		
+  }
+  next();
 }
 
 function validatePost(req, res, next) {}
