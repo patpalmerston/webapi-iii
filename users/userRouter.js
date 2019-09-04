@@ -34,7 +34,13 @@ router.get('/', (req, res) => {
 		});
 });
 
-router.get('/:id', (req, res) => {});
+router.get('/:id', validateUserId, (req, res) => {
+	db.getById().catch(err => {
+		res.status(500).json({
+			error: 'The user info could not be retrieved.'
+		});
+	});
+});
 
 router.get('/:id/posts', (req, res) => {});
 
@@ -45,13 +51,16 @@ router.put('/:id', (req, res) => {});
 //custom middleware
 
 function validateUserId(req, res, next) {
-	let user = req.params.id;
-	if (user.id) {
-		res.status(200).json({ user });
-	} else {
-		res.status(400).json({ message: 'invalid user id' });
-	}
-	next();
+	let userId = req.params.id;
+	db.getById(userId).then(user => {
+		console.log('validatUserId', userId);
+		if (user === undefined || user.length === 0) {
+			res.status(400).json({ message: 'invalid user id' });
+		} else {
+			res.status(200).json({ user });
+		}
+	});
+
 }
 
 function validateUser(req, res, next) {
@@ -59,12 +68,12 @@ function validateUser(req, res, next) {
 	console.log('validateUser', res);
 	if (!req.body) {
 		res.status(400).json({ message: 'missing user data' });
-
+		// next();
 	} else if (!req.body.name) {
 		res.status(400).json({ message: 'missing required name field' });
-		
-  }
-  next();
+		// next();
+	}
+	next();
 }
 
 function validatePost(req, res, next) {}
