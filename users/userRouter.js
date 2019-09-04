@@ -49,7 +49,7 @@ router.delete('/:id', validateUserId, (req, res) => {
 	db.remove(id)
 		.then(user => {
 			if (user) {
-				res.status(204).json({ Message: 'User Delete', id });
+				res.status(200).json({ Message: 'User Delete', id });
 			}
 		})
 		.catch(err => {
@@ -69,9 +69,9 @@ function validateUserId(req, res, next) {
 		if (user === undefined || user.length === 0) {
 			res.status(400).json({ message: 'invalid user id' });
 		} else {
-			res.status(200).json({ user });
+			req.user = user;
+			next();
 		}
-		next();
 	});
 }
 
