@@ -7,7 +7,7 @@ router.post('/', validateUser, (req, res) => {
 	const userData = req.body;
 	db.insert(userData)
 		.then(user => {
-			console.log('users post', user);
+			// console.log('users post', user);
 			res.status(200).json(user);
 		})
 		.catch(err => {
@@ -16,8 +16,20 @@ router.post('/', validateUser, (req, res) => {
 			});
 		});
 });
-
-router.post('/:id/posts', (req, res) => {});
+// NOT WORKING
+router.post('/:id/posts', validatePost, (req, res) => {
+	const postData = req.body;
+	db.insert(postData)
+		.then(post => {
+			console.log('posts post post', post);
+			res.status(200).json(post);
+		})
+		.catch(err => {
+			res.status(500).json({
+				error: 'There was an error while saving the post to the database'
+			});
+		});
+});
 
 router.get('/', (req, res) => {
 	// can not re use the res
@@ -35,14 +47,28 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', validateUserId, (req, res) => {
-	db.getById().catch(err => {
+  const {id} = req.params
+  db.getById(id)
+  .then(user => {
+    res.status(200).json(user)
+  })
+  .catch(err => {
 		res.status(500).json({
 			error: 'The user info could not be retrieved.'
 		});
 	});
 });
 
-router.get('/:id/posts', (req, res) => {});
+router.get('/:id/posts', validatePost, (req, res) => {
+  const {text} = req.body
+  db.getUserPosts(text)
+  .then(post => {
+    res.status(200).json(post)
+  })
+  .catch(err => {
+		res.status(500).json({ error: 'The Post info could not be retrieved' });
+	});
+});
 
 router.delete('/:id', validateUserId, (req, res) => {
 	const { id } = req.params;
@@ -64,7 +90,7 @@ router.put('/:id', (req, res) => {});
 function validateUserId(req, res, next) {
 	let userId = req.params.id;
 
-	db.getById(userId).then(user => {
+	db.get(userId).then(user => {
 		// console.log('validatUserId', userId);
 		if (user === undefined || user.length === 0) {
 			res.status(400).json({ message: 'invalid user id' });
