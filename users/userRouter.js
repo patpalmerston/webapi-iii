@@ -1,6 +1,7 @@
 const express = require('express');
 
 const db = require('./userDb');
+const postDb = require('../posts/postDb');
 const router = express.Router();
 
 router.post('/', validateUser, (req, res) => {
@@ -47,27 +48,27 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', validateUserId, (req, res) => {
-  const {id} = req.params
-  db.getById(id)
-  .then(user => {
-    res.status(200).json(user)
-  })
-  .catch(err => {
-		res.status(500).json({
-			error: 'The user info could not be retrieved.'
+	const { id } = req.params;
+	db.getById(id)
+		.then(user => {
+			res.status(200).json(user);
+		})
+		.catch(err => {
+			res.status(500).json({
+				error: 'The user info could not be retrieved.'
+			});
 		});
-	});
 });
 
-router.get('/:id/posts', validatePost, (req, res) => {
-  const {text} = req.body
-  db.getUserPosts(text)
-  .then(post => {
-    res.status(200).json(post)
-  })
-  .catch(err => {
-		res.status(500).json({ error: 'The Post info could not be retrieved' });
-	});
+router.get('/:id/posts', validateUserId, (req, res) => {
+	const { id } = req.params;
+	db.getUserPosts(id)
+		.then(post => {
+			res.status(200).json(post);
+		})
+		.catch(err => {
+			res.status(500).json({ error: 'The Post info could not be retrieved' });
+		});
 });
 
 router.delete('/:id', validateUserId, (req, res) => {
@@ -118,7 +119,7 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
 	if (!req.body) {
 		res.status(400).json({ message: 'missing post data' });
-	} else if (!req.body.text) {
+	} else if (req.body.text.length === undefined || req.body.text.length === 0) {
 		res.status(400).json({ message: 'missing required text field' });
 	} else {
 		next();
