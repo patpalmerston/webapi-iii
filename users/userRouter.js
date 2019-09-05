@@ -84,8 +84,24 @@ router.delete('/:id', validateUserId, (req, res) => {
 		});
 });
 
-router.put('/:id', (req, res) => {});
-
+router.put('/:id', (req, res) => {
+  const {id} = req.params
+  const newUser = req.body
+  
+  db.update(id, newUser)
+    .then(user => {
+      if(user == 0) {
+        res.status(404).json({ message: 'Post with the id does not exist'})
+      }
+    })
+    .then(user => {
+      res.status(200).json({user})
+    })
+    .catch(err => {
+      res.status(500).json({error: 'The users information could not be modified'})
+    })
+});
+//update(): accepts two arguments, the first is the id of the resource to update and the second is an object with the changes to apply. It returns the count of updated records. If the count is 1 it means the record was updated correctly.
 //custom middleware
 
 function validateUserId(req, res, next) {
